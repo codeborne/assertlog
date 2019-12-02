@@ -1,2 +1,3 @@
-rootProject.name = 'logging-test'
+rootProject.name = 'assertlog'
 
+include 'test-log4j-junit4'

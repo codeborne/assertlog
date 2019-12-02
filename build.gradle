@@ -1,16 +1,59 @@
 plugins {
-    id 'java'
+  id 'java'
 }
 
 group 'com.codeborne'
 version '1.0-SNAPSHOT'
 
-sourceCompatibility = 1.8
+allprojects {
+  apply plugin: 'java'
+  sourceCompatibility = 1.8
 
-repositories {
+  compileJava {
+    options.debug = true
+    options.debugOptions.debugLevel = "source,lines,vars"
+    options.encoding = 'UTF-8'
+  }
+  compileTestJava {
+    options.encoding = 'UTF-8'
+  }
+
+  repositories {
     mavenCentral()
+  }
+
+  tasks.withType(Test).all { testTask ->
+    testTask.jvmArgs += ['-ea', '-Dfile.encoding=UTF-8']
+    testTask.testLogging {exceptionFormat = 'full'}
+  }
+}
+
+subprojects {
+  dependencies {
+    implementation parent
+  }
 }
 
 dependencies {
-    testCompile group: 'junit', name: 'junit', version: '4.12'
+  implementation('junit:junit:4.12')
+  implementation('log4j:log4j:1.2.17')
+  implementation('org.opentest4j:opentest4j:1.2.0')
 }
+
+jar {
+  from sourceSets.main.allSource
+
+  manifest {
+    attributes(
+        "Implementation-Title": project.group + '.' + project.name,
+        "Implementation-Version": archiveVersion,
+        "Implementation-Vendor": "Codeborne")
+  }
+}
+
+test {
+  include 'play/**/*'
+  systemProperties['file.encoding'] = 'UTF-8'
+}
+
+defaultTasks 'clean', 'test'
