@@ -35,7 +35,7 @@ subprojects {
 }
 
 dependencies {
-  implementation('junit:junit:4.12')
+  implementation('junit:junit:4.13')
   implementation('log4j:log4j:1.2.17')
   implementation('org.opentest4j:opentest4j:1.2.0')
 }
