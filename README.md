@@ -40,7 +40,25 @@ public class PetClinicTest {
 
 ## What logging frameworks are supported?
 
-We plan to support all major Java logging frameworks. Currently only Log4j and JUnit are supported. 
+We plan to support all major Java logging frameworks. Currently only Log4j 1 and JUnit 4 are supported. 
+
+## Dependency
+
+You need to add this dependency to you `pom.xml`:
+
+```xml
+<dependency>
+  <groupId>com.codeborne.assertlog</groupId>
+  <artifactId>assertlog-log4j-junit4</artifactId>
+  <version>0.1</version>
+  <scope>test</scope>
+</dependency>
+```
+
+or `build.gradle`:
+```groovy
+testImplementation('com.codeborne.assertlog:assertlog-log4j-junit4:0.1')
+```
 
 ## License
 
