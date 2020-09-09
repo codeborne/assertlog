@@ -1,95 +1,97 @@
-jar {
-  from sourceSets.main.allSource
+subprojects {
+  jar {
+    from sourceSets.main.allSource
 
-  manifest {
-    attributes(
-        "Automatic-Module-Name": project.group + '.' + project.name,
-        "Implementation-Title": project.group + '.' + project.name,
-        "Implementation-Version": archiveVersion,
-        "Implementation-Vendor": "Codeborne")
-  }
-}
-
-task sourcesJar(type: Jar, dependsOn: classes) {
-  classifier = 'sources'
-  from sourceSets.main.allSource
-}
-
-javadoc {
-  // failOnError = false
-  source = sourceSets.main.allJava
-}
-
-task javadocJar(type: Jar, dependsOn: javadoc) {
-  classifier = 'javadoc'
-  from javadoc.destinationDir
-}
-
-artifacts {
-  archives jar
-  archives sourcesJar
-  archives javadocJar
-}
-
-if (project.hasProperty("signing.keyId")) {
-  apply plugin: 'signing'
-
-  signing {
-    sign configurations.archives
+    manifest {
+      attributes(
+          "Automatic-Module-Name": project.group + '.' + project.name,
+          "Implementation-Title": project.group + '.' + project.name,
+          "Implementation-Version": archiveVersion,
+          "Implementation-Vendor": "Codeborne")
+    }
   }
 
-  uploadArchives {
-    repositories {
-      mavenDeployer {
-        beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+  task sourcesJar(type: Jar, dependsOn: classes) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+  }
 
-        repository(url: project.version.endsWith("-SNAPSHOT") ?
-          'https://oss.sonatype.org/content/repositories/snapshots/' :
-          'https://oss.sonatype.org/service/local/staging/deploy/maven2/') {
-          authentication(userName: "$sonatypeUsername", password: "$sonatypePassword")
-        }
+  javadoc {
+    // failOnError = false
+    source = sourceSets.main.allJava
+  }
 
-        pom.project {
-          name archivesBaseName
-          packaging 'jar'
-          description 'AssertLog: Unit-tests for your logging'
-          url 'https://github.com/codeborne/assertlog'
+  task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+  }
 
-          scm {
-            url 'scm:git@github.com:codeborne/assertlog.git'
-            connection 'scm:git@github.com:codeborne/assertlog.git'
-            developerConnection 'scm:git@github.com:codeborne/assertlog.git'
+  artifacts {
+    archives jar
+    archives sourcesJar
+    archives javadocJar
+  }
+
+  if (project.hasProperty("signing.keyId")) {
+    apply plugin: 'signing'
+
+    signing {
+      sign configurations.archives
+    }
+
+    uploadArchives {
+      repositories {
+        mavenDeployer {
+          beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+
+          repository(url: project.version.endsWith("-SNAPSHOT") ?
+              'https://oss.sonatype.org/content/repositories/snapshots/' :
+              'https://oss.sonatype.org/service/local/staging/deploy/maven2/') {
+            authentication(userName: "$sonatypeUsername", password: "$sonatypePassword")
           }
 
-          licenses {
-            license {
-              name 'MIT'
-              url 'https://opensource.org/licenses/MIT'
-              distribution 'repo'
+          pom.project {
+            name archivesBaseName
+            packaging 'jar'
+            description 'AssertLog: Unit-tests for your logging'
+            url 'https://github.com/codeborne/assertlog'
+
+            scm {
+              url 'scm:git@github.com:codeborne/assertlog.git'
+              connection 'scm:git@github.com:codeborne/assertlog.git'
+              developerConnection 'scm:git@github.com:codeborne/assertlog.git'
+            }
+
+            licenses {
+              license {
+                name 'MIT'
+                url 'https://opensource.org/licenses/MIT'
+                distribution 'repo'
+              }
+            }
+
+            developers {
+              developer {
+                id 'asolntsev'
+                name 'Andrei Solntsev'
+              }
             }
           }
 
-          developers {
-            developer {
-              id 'asolntsev'
-              name 'Andrei Solntsev'
-            }
+          //mess with the generated pom to set the 'packaging' tag
+          pom.withXml { XmlProvider xmlProvider ->
+            def xml = xmlProvider.asString()
+            def pomXml = new XmlParser().parse(new ByteArrayInputStream(xml.toString().bytes))
+
+            pomXml.version[0] + { packaging('jar') }
+
+            def newXml = new StringWriter()
+            def printer = new XmlNodePrinter(new PrintWriter(newXml))
+            printer.preserveWhitespace = true
+            printer.print(pomXml)
+            xml.setLength(0)
+            xml.append(newXml.toString())
           }
-        }
-
-        //mess with the generated pom to set the 'packaging' tag
-        pom.withXml { XmlProvider xmlProvider ->
-          def xml = xmlProvider.asString()
-          def pomXml = new XmlParser().parse(new ByteArrayInputStream(xml.toString().bytes))
-
-          pomXml.version[0] + { packaging('jar') }
-
-          def newXml = new StringWriter()
-          def printer = new XmlNodePrinter(new PrintWriter(newXml))
-          printer.preserveWhitespace = true
-          printer.print(pomXml)
-          xml.setLength(0)
-          xml.append(newXml.toString())
         }
       }
     }

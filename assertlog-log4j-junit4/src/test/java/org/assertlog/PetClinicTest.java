@@ -4,6 +4,7 @@ import org.assertlog.junit4.log4j.MockLogging;
 import org.junit.After;
 import org.junit.Rule;
 import org.junit.Test;
+import org.petclinic.PetClinic;
 
 import java.math.BigDecimal;
 
